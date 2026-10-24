@@ -2944,10 +2944,10 @@ static void stick_to_arcade_lever(u32 port, int x, int y)
 	if (x * x + y * y < 16384 * 16384)
 		return;
 	const bool aw = settings.platform.isAtomiswave();
-	const u32 up = aw ? AWAVE_UP_KEY : NAOMI_UP_KEY;
-	const u32 down = aw ? AWAVE_DOWN_KEY : NAOMI_DOWN_KEY;
-	const u32 left = aw ? AWAVE_LEFT_KEY : NAOMI_LEFT_KEY;
-	const u32 right = aw ? AWAVE_RIGHT_KEY : NAOMI_RIGHT_KEY;
+	const u32 up = aw ? (u32)AWAVE_UP_KEY : (u32)NAOMI_UP_KEY;
+	const u32 down = aw ? (u32)AWAVE_DOWN_KEY : (u32)NAOMI_DOWN_KEY;
+	const u32 left = aw ? (u32)AWAVE_LEFT_KEY : (u32)NAOMI_LEFT_KEY;
+	const u32 right = aw ? (u32)AWAVE_RIGHT_KEY : (u32)NAOMI_RIGHT_KEY;
 	// Sector 0 is right, counting clockwise on screen (y grows downwards).
 	const int sector = ((int)lround(atan2((double)y, (double)x) / (M_PI / 4)) + 8) % 8;
 	static const u8 dirs[8] = { 1, 1 | 2, 2, 2 | 4, 4, 4 | 8, 8, 8 | 1 };   // right, down, left, up
