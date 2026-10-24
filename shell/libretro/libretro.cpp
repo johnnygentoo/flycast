@@ -2438,6 +2438,11 @@ void retro_unload_game()
 {
 	INFO_LOG(COMMON, "Flycast unloading game");
 	emu.unloadGame();
+	// DreamStation keeps the engine initialised between games (a deinit/init
+	// cycle re-reserves the address space, which may move, while the CPU
+	// cores keep pointers into the old one). Arm the next retro_run() to
+	// start the newly loaded game.
+	first_run = true;
 	dreampotato::term();
 	game_data.clear();
 	disk_paths.clear();
