@@ -1221,6 +1221,28 @@ if((USE_OPENGL OR USE_GLES2 OR USE_GLES) AND NOT LIBRETRO)
 	target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 endif()
 
+if(LIBRETRO AND LIBRETRO_STATIC)
+	# DreamStation: GGPO rollback netplay in the static engine, started by the
+	# host (shell/dreamstation/netplay.cpp) instead of the GUI.
+	target_compile_definitions(${PROJECT_NAME} PRIVATE DREAMSTATION_NETPLAY)
+	target_include_directories(${PROJECT_NAME} PRIVATE core/deps/ggpo/include core/deps/ggpo/lib/ggpo)
+	target_sources(${PROJECT_NAME} PRIVATE
+		shell/dreamstation/netplay.cpp
+		core/deps/ggpo/lib/ggpo/bitvector.cpp
+		core/deps/ggpo/lib/ggpo/game_input.cpp
+		core/deps/ggpo/lib/ggpo/input_queue.cpp
+		core/deps/ggpo/lib/ggpo/main.cpp
+		core/deps/ggpo/lib/ggpo/platform_linux.cpp
+		core/deps/ggpo/lib/ggpo/poll.cpp
+		core/deps/ggpo/lib/ggpo/sync.cpp
+		core/deps/ggpo/lib/ggpo/timesync.cpp
+		core/deps/ggpo/lib/ggpo/backends/p2p.cpp
+		core/deps/ggpo/lib/ggpo/backends/spectator.cpp
+		core/deps/ggpo/lib/ggpo/backends/synctest.cpp
+		core/deps/ggpo/lib/ggpo/network/udp_proto.cpp
+		core/deps/ggpo/lib/ggpo/network/udp.cpp)
+endif()
+
 if(NOT LIBRETRO)
 	target_include_directories(${PROJECT_NAME} PRIVATE core/deps/ggpo/include core/deps/ggpo/lib/ggpo)
 	target_sources(${PROJECT_NAME} PRIVATE

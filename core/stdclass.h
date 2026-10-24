@@ -186,6 +186,8 @@ std::string strprintf(const char *format, Args ... args)
 	return out;
 }
 
+namespace hostfs { class File; }
+
 class MD5Sum
 {
 	MD5_CTX ctx;
@@ -199,6 +201,11 @@ public:
 		MD5_Update(&ctx, data, len);
 		return *this;
 	}
+
+	// The whole file's contents. (Without this overload a hostfs::File*
+	// goes to add(const T&) and the pointer itself gets hashed, so netplay
+	// peers never agreed on a disc's or save state's digest.)
+	MD5Sum& add(hostfs::File *file);
 
 	MD5Sum& add(std::FILE *file) {
 		std::fseek(file, 0, SEEK_SET);

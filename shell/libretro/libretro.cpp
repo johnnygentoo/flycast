@@ -1701,6 +1701,20 @@ static const char *get_axis_name(unsigned index, const char *default_name)
 	return NULL;
 }
 
+// DreamStation: what the running arcade game calls one of its inputs.
+// `kind` 0 is a joypad button id (RETRO_DEVICE_ID_JOYPAD_*), 1 an axis
+// (0, 1 left stick X, Y; 2, 3 right stick). NULL when no arcade game runs or
+// the game does not use that input; "" when it uses it under no name of its
+// own.
+extern "C" const char *dreamstation_arcade_input_name(int kind, unsigned id)
+{
+	if (!settings.platform.isArcade())
+		return NULL;
+	if (kind == 1)
+		return get_axis_name(id, "");
+	return get_button_name(RETRO_DEVICE_JOYPAD, id, "");
+}
+
 static void set_input_descriptors()
 {
 	struct retro_input_descriptor desc[100];
@@ -2908,6 +2922,42 @@ void updateLightgunCoordinatesFromAnalogStick(int port)
 	lightgun_params[port].y = mo_y_abs[port];
 }
 
+// DreamStation: an arcade cabinet's joystick is an 8-way lever, read only as
+// the four direction switches. Games that read no analog axis of their own
+// also take the left stick as that lever, so a pad's stick moves the player
+// as well as its D-pad. The stick is split into eight equal sectors, and it
+// must be pushed at least half way.
+static bool game_reads_left_stick()
+{
+	if (NaomiGameInputs == NULL)
+		return false;
+	for (int i = 0; NaomiGameInputs->axes[i].name != NULL; i++)
+		if (NaomiGameInputs->axes[i].axis == 0 || NaomiGameInputs->axes[i].axis == 1)
+			return true;
+	return false;
+}
+
+static void stick_to_arcade_lever(u32 port, int x, int y)
+{
+	if (settings.input.lightgunGame || game_reads_left_stick())
+		return;
+	if (x * x + y * y < 16384 * 16384)
+		return;
+	const bool aw = settings.platform.isAtomiswave();
+	const u32 up = aw ? AWAVE_UP_KEY : NAOMI_UP_KEY;
+	const u32 down = aw ? AWAVE_DOWN_KEY : NAOMI_DOWN_KEY;
+	const u32 left = aw ? AWAVE_LEFT_KEY : NAOMI_LEFT_KEY;
+	const u32 right = aw ? AWAVE_RIGHT_KEY : NAOMI_RIGHT_KEY;
+	// Sector 0 is right, counting clockwise on screen (y grows downwards).
+	const int sector = ((int)lround(atan2((double)y, (double)x) / (M_PI / 4)) + 8) % 8;
+	static const u8 dirs[8] = { 1, 1 | 2, 2, 2 | 4, 4, 4 | 8, 8, 8 | 1 };   // right, down, left, up
+	const u8 d = dirs[sector];
+	if (d & 1) kcode[port] &= ~right;
+	if (d & 2) kcode[port] &= ~down;
+	if (d & 4) kcode[port] &= ~left;
+	if (d & 8) kcode[port] &= ~up;
+}
+
 static void UpdateInputStateNaomi(u32 port)
 {
 	switch (config::MapleMainDevices[port])
@@ -3059,6 +3109,7 @@ static void UpdateInputStateNaomi(u32 port)
 
 			get_analog_stick(input_cb, port, RETRO_DEVICE_INDEX_ANALOG_LEFT, &joyx[port], &joyy[port] );
 			get_analog_stick(input_cb, port, RETRO_DEVICE_INDEX_ANALOG_RIGHT, &joyrx[port], &joyry[port]);
+			stick_to_arcade_lever(port, joyx[port], joyy[port]);
 			lt[port] = get_analog_trigger(ret, input_cb, port, RETRO_DEVICE_ID_JOYPAD_L2) * 2;
 			rt[port] = get_analog_trigger(ret, input_cb, port, RETRO_DEVICE_ID_JOYPAD_R2) * 2;
 

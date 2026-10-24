@@ -105,7 +105,8 @@
 #endif
 #endif
 
-#if !defined(LIBRETRO)
+// DreamStation builds the libretro shell as a static engine with GGPO netplay.
+#if !defined(LIBRETRO) || defined(DREAMSTATION_NETPLAY)
 #define USE_GGPO
 #endif
 
