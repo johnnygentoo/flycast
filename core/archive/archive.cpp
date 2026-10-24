@@ -22,6 +22,7 @@
 #include "archive.h"
 #include "7zArchive.h"
 #include "ZipArchive.h"
+#include "DirArchive.h"
 #include "oslib/storage.h"
 
 Archive *OpenArchive(const std::string& path)
@@ -61,7 +62,8 @@ Archive *OpenArchive(const std::string& path)
 		{
 			file = hostfs::storage().openFile(path + ".ZIP", "rb");
 			if (file == nullptr)
-				return nullptr;
+				// No archive: an unzipped set is a folder of the same name
+				return DirArchive::open(path);
 		}
 	}
 	Archive *zip_archive = new ZipArchive();

@@ -152,10 +152,12 @@ static bool loadBios(const char *biosName, Archive *child_archive, Archive *pare
 
 static const Game *FindGame(const char *filename)
 {
-	std::string gameName = get_file_basename(filename);
+	// Strip the folder first: a dot in a parent folder's name is not an extension
+	std::string gameName = filename;
 	size_t folder_pos = get_last_slash_pos(gameName);	// Only for standard path
 	if (folder_pos != std::string::npos)
 		gameName = gameName.substr(folder_pos + 1);
+	gameName = get_file_basename(gameName);
 
 	for (int i = 0; Games[i].name != nullptr; i++)
 		if (gameName == Games[i].name)
@@ -628,7 +630,7 @@ void naomi_cart_LoadRom(const std::string& path, const std::string& fileName, Lo
 	}
 	std::string extension = get_file_extension(fileName);
 
-	if (extension == "zip" || extension == "7z")
+	if (extension == "zip" || extension == "7z" || naomi_cart_IsSetFolder(path))
 		loadMameRom(path, fileName, progress);
 	else
 		loadDecryptedRom(path, fileName, progress);
@@ -805,6 +807,17 @@ void naomi_cart_deserialize(Deserializer& deser)
 	touchscreen::deserialize(deser);
 	printer::deserialize(deser);
 	hopper::deserialize(deser);
+}
+
+bool naomi_cart_IsSetFolder(const std::string& path)
+{
+	if (FindGame(path.c_str()) == nullptr)
+		return false;
+	try {
+		return hostfs::storage().getFileInfo(path).isDirectory;
+	} catch (const hostfs::StorageException&) {
+		return false;
+	}
 }
 
 int naomi_cart_GetPlatform(const char *path)

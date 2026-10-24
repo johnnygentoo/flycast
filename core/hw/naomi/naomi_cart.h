@@ -138,6 +138,8 @@ public:
 void naomi_cart_LoadRom(const std::string& path, const std::string& fileName, LoadProgress *progress);
 void naomi_cart_Close();
 int naomi_cart_GetPlatform(const char *path);
+// An unzipped ROM set: a folder named after a set in the game table.
+bool naomi_cart_IsSetFolder(const std::string& path);
 void naomi_cart_LoadBios(const char *filename);
 void naomi_cart_ConfigureEEPROM();
 void naomi_cart_serialize(Serializer& ser);

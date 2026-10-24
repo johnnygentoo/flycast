@@ -2267,7 +2267,10 @@ bool retro_load_game(const struct retro_game_info *game)
 	{
 		/* Check for extension .lst, .bin, .dat or .zip. If found, we will set the system type
 		 * automatically to Naomi or AtomisWave. */
-		if (ext)
+		if (game != nullptr && game->path != nullptr && naomi_cart_IsSetFolder(game->path))
+			// An unzipped ROM set
+			settings.platform.system = naomi_cart_GetPlatform(game->path);
+		else if (ext)
 		{
 			log_cb(RETRO_LOG_INFO, "File extension is: %s\n", ext);
 			if (!strcmp(".lst", ext)

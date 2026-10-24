@@ -586,7 +586,11 @@ void Emulator::loadGame(const char *path, LoadProgress *progress)
 			settings.content.fileName.clear();
 		}
 
-		setPlatform(getGamePlatform(settings.content.fileName));
+		if (naomi_cart_IsSetFolder(settings.content.path))
+			// An unzipped ROM set
+			setPlatform(naomi_cart_GetPlatform(settings.content.fileName.c_str()));
+		else
+			setPlatform(getGamePlatform(settings.content.fileName));
 		mem_map_default();
 
 		config::Settings::instance().reset();
