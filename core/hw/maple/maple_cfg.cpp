@@ -378,6 +378,16 @@ public:
 	}
 };
 
+// Expansion slots the host has unplugged (bit = slot), kept empty whatever
+// the configuration says until it plugs them back.
+u8 dreamstation_vmu_held[MAPLE_PORTS];
+
+static bool expansionWanted(int bus, int slot)
+{
+	return config::MapleExpansionDevices[bus][slot] != MDT_None
+		&& !(dreamstation_vmu_held[bus] & (1 << slot));
+}
+
 static void createDreamcastDevices()
 {
 	for (int bus = 0; bus < MAPLE_PORTS; ++bus)
@@ -387,9 +397,9 @@ static void createDreamcastDevices()
 		case MDT_SegaController:
 		case MDT_SegaControllerXL:
 			mcfg_Create(config::MapleMainDevices[bus], bus, 5);
-			if (config::MapleExpansionDevices[bus][0] != MDT_None)
+			if (expansionWanted(bus, 0))
 				mcfg_Create(config::MapleExpansionDevices[bus][0], bus, 0);
-			if (config::MapleExpansionDevices[bus][1] != MDT_None)
+			if (expansionWanted(bus, 1))
 				mcfg_Create(config::MapleExpansionDevices[bus][1], bus, 1);
 			break;
 
@@ -412,7 +422,7 @@ static void createDreamcastDevices()
 		case MDT_AsciiStick:
 		case MDT_RacingController:
 			mcfg_Create(config::MapleMainDevices[bus], bus, 5);
-			if (config::MapleExpansionDevices[bus][0] != MDT_None)
+			if (expansionWanted(bus, 0))
 				mcfg_Create(config::MapleExpansionDevices[bus][0], bus, 0);
 			break;
 

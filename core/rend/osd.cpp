@@ -23,12 +23,16 @@
 u32 vmu_lcd_data[8][48 * 32];
 bool vmu_lcd_status[8];
 u64 vmuLastChanged[8];
+u8 vmu_lcd_raw[8][48 * 32];
+u64 vmu_lcd_serial[8];
 
 void push_vmu_screen(int bus_id, int bus_port, u8* buffer)
 {
 	int vmu_id = bus_id * 2 + bus_port;
 	if (vmu_id < 0 || vmu_id >= (int)std::size(vmu_lcd_data))
 		return;
+	memcpy(vmu_lcd_raw[vmu_id], buffer, sizeof(vmu_lcd_raw[vmu_id]));
+	vmu_lcd_serial[vmu_id]++;
 	u32 *p = &vmu_lcd_data[vmu_id][0];
 	for (int i = 0; i < (int)std::size(vmu_lcd_data[vmu_id]); i++, buffer++)
 #ifdef LIBRETRO

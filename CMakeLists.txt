@@ -197,7 +197,8 @@ if(NINTENDO_SWITCH)
 
 elseif(LIBRETRO)
 	if(LIBRETRO_STATIC)
-		add_library(${PROJECT_NAME} STATIC core/emulator.cpp shell/dreamstation/arcade_lookup.cpp)
+		add_library(${PROJECT_NAME} STATIC core/emulator.cpp shell/dreamstation/arcade_lookup.cpp
+			shell/dreamstation/vmu_access.cpp)
 	else()
 		add_library(${PROJECT_NAME} SHARED core/emulator.cpp)
 	endif()

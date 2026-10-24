@@ -23,6 +23,10 @@
 extern u32 vmu_lcd_data[8][48 * 32];
 extern bool vmu_lcd_status[8];
 extern u64 vmuLastChanged[8];
+// The same screens as dots (non-zero = lit), and a count that changes with
+// every new image (0 = none yet), for a host drawing them itself.
+extern u8 vmu_lcd_raw[8][48 * 32];
+extern u64 vmu_lcd_serial[8];
 
 void push_vmu_screen(int bus_id, int bus_port, u8* buffer);
 
